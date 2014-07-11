@@ -7,7 +7,7 @@ birdhousebuilder.recipe.tomcat
 Introduction
 ************
 
-``birdhousebuilder.recipe.tomcat`` is a `Buildout`_ recipe to configure nginx web service.
+``birdhousebuilder.recipe.tomcat`` is a `Buildout`_ recipe to configure tomcat web service with anaconda.
 
 .. _`Buildout`: http://buildout.org/
 
