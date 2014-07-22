@@ -21,7 +21,7 @@ class Recipe(object):
     def install(self):
         installed = []
         installed += list(self.install_tomcat())
-        installed += list(self.install_program())
+        installed += list(self.setup_service())
         return installed
 
     def install_tomcat(self):
@@ -32,7 +32,7 @@ class Recipe(object):
 
         return script.install()
         
-    def install_program(self):
+    def setup_service(self):
         script = supervisor.Recipe(
             self.buildout,
             self.name,
