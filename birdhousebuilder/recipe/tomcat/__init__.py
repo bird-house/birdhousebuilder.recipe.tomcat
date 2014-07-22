@@ -9,8 +9,6 @@ from mako.template import Template
 import zc.buildout
 from birdhousebuilder.recipe import conda, supervisor
 
-#templ_config = Template(filename=os.path.join(os.path.dirname(__file__), "nginx.conf"))
-
 class Recipe(object):
     """This recipe is used by zc.buildout"""
 
