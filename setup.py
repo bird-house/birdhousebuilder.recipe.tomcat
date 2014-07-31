@@ -6,7 +6,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 version = '0.1.2'
-description = 'A Buildout recipe to install and configure tomcat'
+description = 'A Buildout recipe to install and configure tomcat for Anaconda.'
 long_description = (
     open('README.rst').read() + '\n' +
     open('AUTHORS.rst').read() + '\n' +
