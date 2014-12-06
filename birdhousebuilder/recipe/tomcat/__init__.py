@@ -25,7 +25,7 @@ class Recipe(object):
         installed += list(self.install_tomcat())
         installed += list(self.setup_config())
         installed += list(self.setup_service())
-        return installed
+        return tuple()
 
     def install_tomcat(self):
         script = conda.Recipe(
@@ -60,7 +60,10 @@ class Recipe(object):
         return script.install()
 
     def update(self):
-        return self.install()
+        #self.install_tomcat()
+        self.setup_config()
+        self.setup_service()
+        return tuple()
 
 def uninstall(name, options):
     pass
