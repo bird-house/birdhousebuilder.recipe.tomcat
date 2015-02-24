@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C)2014 DKRZ GmbH
+# Copyright (C)2015 DKRZ GmbH
 
 """Recipe tomcat"""
 
@@ -12,13 +12,14 @@ from birdhousebuilder.recipe import conda, supervisor
 users_config = Template(filename=os.path.join(os.path.dirname(__file__), "tomcat-users.xml"))
 
 class Recipe(object):
-    """This recipe is used by zc.buildout"""
+    """This recipe is used by zc.buildout.
+    It installs apache-tomcat as conda package and setups tomcat configuration"""
 
     def __init__(self, buildout, name, options):
         self.buildout, self.name, self.options = buildout, name, options
         b_options = buildout['buildout']
-        self.anaconda_home = b_options.get('anaconda-home', conda.anaconda_home())
-        self.options['prefix'] = self.anaconda_home
+        self.prefix = self.options.get('prefix', conda.prefix())
+        self.options['prefix'] = self.prefix
 
     def install(self):
         installed = []
@@ -38,7 +39,7 @@ class Recipe(object):
     def setup_config(self):
         result = users_config.render(**self.options)
 
-        output = os.path.join(self.anaconda_home, 'opt', 'apache-tomcat', 'conf', 'tomcat-users.xml')
+        output = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'conf', 'tomcat-users.xml')
         conda.makedirs(os.path.dirname(output))
 
         try:
@@ -55,7 +56,7 @@ class Recipe(object):
             self.buildout,
             self.name,
             {'program': 'tomcat',
-             'command': '%s/bin/catalina.sh run' % (self.anaconda_home),
+             'command': '%s/bin/catalina.sh run' % (self.prefix),
              })
         return script.install()
 

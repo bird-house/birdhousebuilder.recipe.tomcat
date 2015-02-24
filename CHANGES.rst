@@ -1,6 +1,13 @@
 Changes
 *******
 
+0.2.0 (2014-02-24)
+==================
+
+* installing in conda enviroment ``birdhouse``.
+* using ``$ANACONDA_HOME`` environment variable.
+* separation of anaconda-home and installation prefix.
+
 0.1.4 (2014-12-06)
 ==================
 

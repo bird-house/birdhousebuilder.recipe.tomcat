@@ -5,7 +5,7 @@ This module contains the tool of birdhousebuilder.recipe.tomcat
 from setuptools import find_packages
 from setuptools import setup
 
-version = '0.1.4'
+version = '0.2.1'
 description = 'A Buildout recipe to install and configure tomcat for Anaconda.'
 long_description = (
     open('README.rst').read() + '\n' +
@@ -37,8 +37,7 @@ setup(name='birdhousebuilder.recipe.tomcat',
           'License :: OSI Approved :: BSD License',
       ],
       keywords='buildout recipe',
-      author='Carsten Ehbrecht',
-      author_email='ehbrecht at dkrz.de',
+      author='Birdhouse: http://bird-house.github.io/',
       url='https://github.com/bird-house/birdhousebuilder.recipe.tomcat',
       license='BSD',
       packages=find_packages(exclude=['ez_setup']),
