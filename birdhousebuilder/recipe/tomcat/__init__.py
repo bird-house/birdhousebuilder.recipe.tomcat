@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Copyright (C)2015 DKRZ GmbH
 
 """Recipe tomcat"""
 
@@ -9,7 +8,8 @@ from mako.template import Template
 import zc.buildout
 from birdhousebuilder.recipe import conda, supervisor
 
-users_config = Template(filename=os.path.join(os.path.dirname(__file__), "tomcat-users.xml"))
+users_xml = Template(filename=os.path.join(os.path.dirname(__file__), "tomcat-users.xml"))
+server_xml = Template(filename=os.path.join(os.path.dirname(__file__), "server.xml"))
 
 class Recipe(object):
     """This recipe is used by zc.buildout.
@@ -20,11 +20,14 @@ class Recipe(object):
         b_options = buildout['buildout']
         self.prefix = self.options.get('prefix', conda.prefix())
         self.options['prefix'] = self.prefix
+        self.options['http_port'] = self.options.get('http_port', '8080')
+        self.options['https_port'] = self.options.get('https_port', '8080')
 
     def install(self):
         installed = []
         installed += list(self.install_tomcat())
-        installed += list(self.setup_config())
+        installed += list(self.setup_users_config())
+        installed += list(self.setup_server_config())
         installed += list(self.setup_service())
         return tuple()
 
@@ -36,8 +39,8 @@ class Recipe(object):
 
         return script.install()
 
-    def setup_config(self):
-        result = users_config.render(**self.options)
+    def setup_users_config(self):
+        result = users_xml.render(**self.options)
 
         output = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'conf', 'tomcat-users.xml')
         conda.makedirs(os.path.dirname(output))
@@ -50,19 +53,36 @@ class Recipe(object):
         with open(output, 'wt') as fp:
             fp.write(result)
         return [output]
+
+    def setup_server_config(self):
+        result = server_xml.render(**self.options)
+
+        output = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'conf', 'server.xml')
+        conda.makedirs(os.path.dirname(output))
+
+        try:
+            os.remove(output)
+        except OSError:
+            pass
+
+        with open(output, 'wt') as fp:
+            fp.write(result)
+        return [output]
     
     def setup_service(self):
+        content_path = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'content')
         script = supervisor.Recipe(
             self.buildout,
             self.name,
             {'program': 'tomcat',
-             'command': '%s/bin/catalina.sh run' % (self.prefix),
+             'command': '{0}/bin/catalina.sh run'.format(self.prefix),
              })
         return script.install()
 
     def update(self):
         #self.install_tomcat()
-        self.setup_config()
+        self.setup_users_config()
+        self.setup_server_config()
         self.setup_service()
         return tuple()
 

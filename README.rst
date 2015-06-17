@@ -26,7 +26,7 @@ The recipe requires that Anaconda is already installed. It assumes that the defa
 
 It installs the ``apache-tomcat`` package from a conda channel in a conda enviroment named ``birdhouse``. The location of the birdhouse environment is ``.conda/envs/birdhouse``. It deploys a `Supervisor`_ configuration in ``~/.conda/envs/birdhouse/etc/supervisor/conf.d/tomcat.conf``. Supervisor can be started with ``~/.conda/envs/birdhouse/etc/init.d/supervisord start``.
 
-By default Tomcat will be available on http://localhost:8080/thredds.
+By default Tomcat will be available on http://localhost:8080/.
 
 The recipe depends on ``birdhousebuilder.recipe.conda`` and ``birdhousebuilder.recipe.supervisor``.
 
@@ -47,6 +47,9 @@ This recipe supports the following options:
    2. ``$ANACONDA_HOME``
    3. ``$HOME/anaconda``
 
+``http_port``
+   HTTP Port for Tomcat service. Default: 8080
+
 Example usage
 =============
 
@@ -59,6 +62,7 @@ The following example ``buildout.cfg`` installs ``tomcat`` as a Supervisor servi
 
   [tomcat]
   recipe = birdhousebuilder.recipe.tomcat
+  http_port = 8080
 
 
 
