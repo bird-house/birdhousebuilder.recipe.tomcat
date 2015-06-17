@@ -2,6 +2,10 @@
 birdhousebuilder.recipe.tomcat
 ******************************
 
+.. image:: https://travis-ci.org/bird-house/birdhousebuilder.recipe.tomcat.svg?branch=master
+   :target: https://travis-ci.org/bird-house/birdhousebuilder.recipe.tomcat
+   :alt: Travis Build
+
 .. contents::
 
 Introduction
