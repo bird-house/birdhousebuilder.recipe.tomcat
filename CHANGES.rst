@@ -4,6 +4,8 @@ Changes
 0.2.2 (2015-06-17)
 ==================
 
+* added content_root().
+* using catalina-wrapper.sh script for supervisor.
 * added option ``http_port``.
 
 0.2.1 (2015-02-24)
