@@ -27,8 +27,9 @@ class Recipe(object):
         b_options = buildout['buildout']
         self.prefix = self.options.get('prefix', conda.prefix())
         self.options['prefix'] = self.prefix
+        self.options['user'] = self.options.get('user', '')
         self.options['http_port'] = self.options.get('http_port', '8080')
-        self.options['https_port'] = self.options.get('https_port', '8080')
+        self.options['https_port'] = self.options.get('https_port', '8443')
         self.options['content_root'] = content_root(self.prefix)
 
     def install(self):
@@ -101,7 +102,8 @@ class Recipe(object):
         script = supervisor.Recipe(
             self.buildout,
             self.name,
-            {'program': 'tomcat',
+            {'user': self.options.get('user'),
+             'program': 'tomcat',
              'command': '{0}/opt/apache-tomcat/bin/catalina-wrapper.sh'.format(self.prefix),
              })
         return script.install()
