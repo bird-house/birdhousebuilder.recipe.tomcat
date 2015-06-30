@@ -30,6 +30,9 @@ class Recipe(object):
         self.options['user'] = self.options.get('user', '')
         self.options['http_port'] = self.options.get('http_port', '8080')
         self.options['https_port'] = self.options.get('https_port', '8443')
+        self.options['Xmx'] = self.options.get('Xmx', '1024m')
+        self.options['Xms'] = self.options.get('Xms', '128m')
+        self.options['MaxPermSize'] = self.options.get('MaxPermSize', '128m')
         self.options['content_root'] = content_root(self.prefix)
 
     def install(self):

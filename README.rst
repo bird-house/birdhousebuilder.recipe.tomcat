@@ -50,6 +50,16 @@ This recipe supports the following options:
 ``http_port``
    HTTP Port for Tomcat service. Default: 8080
 
+``Xms``
+   Initial Java heap size: Default: 128m
+
+``Xmx``
+   Maximum Java heap size: Default: 1024m
+
+``MaxPermSize``
+   Maximum Java permanent heap size: Default: 128m
+
+
 Example usage
 =============
 
@@ -63,6 +73,9 @@ The following example ``buildout.cfg`` installs ``tomcat`` as a Supervisor servi
   [tomcat]
   recipe = birdhousebuilder.recipe.tomcat
   http_port = 8080
+  Xms = 256m
+  Xmx = 2048m
+  MaxPermSize = 128m
 
 
 
