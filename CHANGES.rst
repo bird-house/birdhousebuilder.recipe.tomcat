@@ -1,6 +1,12 @@
 Changes
 *******
 
+0.2.5 (2015-08-04)
+==================
+
+* using OpenJDK from conda package.
+* setting JAVA_HOME in cataling wrapper.
+
 0.2.4 (2015-06-30)
 ==================
 
