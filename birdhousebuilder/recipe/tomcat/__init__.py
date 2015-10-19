@@ -5,6 +5,7 @@
 import os
 import stat
 from mako.template import Template
+from subprocess import check_call, CalledProcessError
 
 import zc.buildout
 from birdhousebuilder.recipe import conda, supervisor
@@ -13,11 +14,29 @@ catalina_sh = Template(filename=os.path.join(os.path.dirname(__file__), "catalin
 users_xml = Template(filename=os.path.join(os.path.dirname(__file__), "tomcat-users.xml"))
 server_xml = Template(filename=os.path.join(os.path.dirname(__file__), "server.xml"))
 
+def tomcat_home(prefix):
+    home_path = os.path.join(prefix, 'opt', 'apache-tomcat')
+    conda.makedirs(os.path.dirname(home_path))
+    return home_path
+
 def content_root(prefix):
     root_path = os.path.join(prefix, 'var', 'lib', 'tomcat', 'content')
     conda.makedirs(os.path.dirname(root_path))
     return root_path
-                
+
+def unzip(prefix, warfile):
+    warname = os.path.basename(warfile)
+    dirname = warname[0:-4]
+    appspath = os.path.join(tomcat_home(prefix), 'webapps')
+    dirpath = os.path.join(appspath, dirname)
+    if not os.path.isdir(dirpath):
+        try:
+            check_call(['unzip', '-q', os.path.join(appspath, warname), '-d', dirpath])
+        except CalledProcessError:
+            raise
+        except:
+            raise
+        
 class Recipe(object):
     """This recipe is used by zc.buildout.
     It installs apache-tomcat as conda package and setups tomcat configuration"""
