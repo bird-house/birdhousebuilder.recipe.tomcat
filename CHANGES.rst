@@ -1,6 +1,11 @@
 Changes
 *******
 
+0.2.7 (2015-10-20)
+==================
+
+* added ncwms-password option for tomcat-users.xml
+
 0.2.6 (2015-10-19)
 ==================
 

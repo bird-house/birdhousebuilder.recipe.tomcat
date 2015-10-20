@@ -53,6 +53,7 @@ class Recipe(object):
         self.options['Xms'] = self.options.get('Xms', '128m')
         self.options['MaxPermSize'] = self.options.get('MaxPermSize', '128m')
         self.options['content_root'] = content_root(self.prefix)
+        self.options['ncwms_password'] = self.options.get('ncwms_password', '')
 
     def install(self):
         installed = []

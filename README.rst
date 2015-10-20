@@ -59,6 +59,9 @@ This recipe supports the following options:
 ``MaxPermSize``
    Maximum Java permanent heap size: Default: 128m
 
+``ncwms_password``
+   Enable ncWMS2 admin web interface by setting a password: Default: disabled
+
 
 Example usage
 =============

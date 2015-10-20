@@ -31,4 +31,19 @@
   <role rolename="manager-gui"/>
   <user username="birdhouse" password="4FO72WcTt7K9gYiNKApf" roles="tomcat,manager-gui"/>
 -->
+
+<!--
+  NOTE: Enable ncWMS admin if you want to configure ncWMS with the web interface.
+
+  See Details:
+  http://reading-escience-centre.github.io/edal-java/ncWMS_user_guide.html
+-->
+<!--
+  <role rolename="ncWMS-admin" />
+  <user username="admin" password="ju68hfld" roles="ncWMS-admin"/>
+-->
+% if len(ncwms_password) > 3:
+  <role rolename="ncWMS-admin" />
+  <user username="admin" password="${ncwms_password}" roles="ncWMS-admin"/>
+% endif
 </tomcat-users>
