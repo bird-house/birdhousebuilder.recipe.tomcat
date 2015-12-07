@@ -55,22 +55,24 @@ class Recipe(object):
         self.options['content_root'] = content_root(self.prefix)
         self.options['ncwms_password'] = self.options.get('ncwms_password', '')
 
-    def install(self):
+    def install(self, update=False):
         installed = []
-        installed += list(self.install_tomcat())
+        installed += list(self.install_tomcat(update))
         installed += list(self.setup_catalina_wrapper())
         installed += list(self.setup_users_config())
         installed += list(self.setup_server_config())
-        installed += list(self.setup_service())
-        return tuple()
+        installed += list(self.setup_supervisor(update))
+        return installed
 
-    def install_tomcat(self):
+    def install_tomcat(self, update=False):
         script = conda.Recipe(
             self.buildout,
             self.name,
             {'pkgs': 'apache-tomcat'})
-
-        return script.install()
+        if update == True:
+            return script.update()
+        else:
+            return script.install()
 
     def setup_catalina_wrapper(self):
         result = catalina_sh.render(**self.options)
@@ -120,7 +122,7 @@ class Recipe(object):
             fp.write(result)
         return [output]
     
-    def setup_service(self):
+    def setup_supervisor(self, update=False):
         content_path = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'content')
         script = supervisor.Recipe(
             self.buildout,
@@ -129,15 +131,10 @@ class Recipe(object):
              'program': 'tomcat',
              'command': '{0}/opt/apache-tomcat/bin/catalina-wrapper.sh'.format(self.prefix),
              })
-        return script.install()
+        return script.install(update)
 
     def update(self):
-        #self.install_tomcat()
-        self.setup_catalina_wrapper()
-        self.setup_users_config()
-        self.setup_server_config()
-        self.setup_service()
-        return tuple()
+        return self.install(update=True)
 
 def uninstall(name, options):
     pass
