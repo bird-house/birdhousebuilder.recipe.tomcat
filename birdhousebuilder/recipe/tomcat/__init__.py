@@ -87,9 +87,8 @@ class Recipe(object):
 
         with open(output, 'wt') as fp:
             fp.write(result)
-        # add exec permission
-        st = os.stat(output)
-        os.chmod(output, st.st_mode | stat.S_IEXEC)
+        # make sure script is executable for all
+        os.chmod(output, 0o755)
         return [output]
 
     def setup_users_config(self):
