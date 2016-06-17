@@ -44,8 +44,13 @@ class Recipe(object):
     def __init__(self, buildout, name, options):
         self.buildout, self.name, self.options = buildout, name, options
         b_options = buildout['buildout']
-        self.prefix = self.options.get('prefix', conda.prefix())
+
+        self.prefix = b_options.get('birdhouse-home', "/opt/birdhouse")
         self.options['prefix'] = self.prefix
+
+        self.env_path = conda.conda_env_path(buildout, options)
+        self.options['env_path'] = self.env_path
+        
         self.options['user'] = self.options.get('user', '')
         self.options['http_port'] = self.options.get('http_port', '8080')
         self.options['https_port'] = self.options.get('https_port', '8443')
@@ -69,10 +74,7 @@ class Recipe(object):
             self.buildout,
             self.name,
             {'pkgs': 'apache-tomcat'})
-        if update == True:
-            return script.update()
-        else:
-            return script.install()
+        return script.install(update)
 
     def setup_catalina_wrapper(self):
         result = catalina_sh.render(**self.options)
