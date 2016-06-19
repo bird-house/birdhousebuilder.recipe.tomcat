@@ -45,8 +45,16 @@ class Recipe(object):
         self.buildout, self.name, self.options = buildout, name, options
         b_options = buildout['buildout']
 
-        self.prefix = b_options.get('birdhouse-home', "/opt/birdhouse")
-        self.options['prefix'] = self.prefix
+        deployment = self.deployment = options.get('deployment')
+        if deployment:
+            self.options['prefix'] = buildout[deployment].get('prefix')
+            self.options['etc_prefix'] = buildout[deployment].get('etc-prefix')
+            self.options['var_prefix'] = buildout[deployment].get('var-prefix')
+        else:
+            self.options['prefix'] = os.path.join(buildout['buildout']['parts-directory'], self.name)
+            self.options['etc_prefix'] = os.path.join(self.options['prefix'], 'etc')
+            self.options['var_prefix'] = os.path.join(self.options['prefix'], 'var')
+        self.prefix = self.options['prefix']
 
         self.env_path = conda.conda_env_path(buildout, options)
         self.options['env_path'] = self.env_path
@@ -66,7 +74,7 @@ class Recipe(object):
         installed += list(self.setup_catalina_wrapper())
         installed += list(self.setup_users_config())
         installed += list(self.setup_server_config())
-        installed += list(self.setup_supervisor(update))
+        installed += list(self.install_supervisor(update))
         return installed
 
     def install_tomcat(self, update=False):
@@ -123,12 +131,13 @@ class Recipe(object):
             fp.write(result)
         return [output]
     
-    def setup_supervisor(self, update=False):
+    def install_supervisor(self, update=False):
         content_path = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'content')
         script = supervisor.Recipe(
             self.buildout,
             self.name,
-            {'user': self.options.get('user'),
+            {'deployment': self.deployment,
+             'user': self.options.get('user'),
              'program': 'tomcat',
              'command': '{0}/opt/apache-tomcat/bin/catalina-wrapper.sh'.format(self.prefix),
              })
