@@ -49,6 +49,7 @@ setup(name='birdhousebuilder.recipe.tomcat',
                         'zc.buildout',
                         # -*- Extra requirements: -*-
                         'Mako',
+                        'zc.recipe.deployment',
                         'birdhousebuilder.recipe.conda',
                         'birdhousebuilder.recipe.supervisor',
                         ],
