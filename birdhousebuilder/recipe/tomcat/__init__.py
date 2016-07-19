@@ -4,32 +4,26 @@
 
 import os
 import stat
+import pwd
 import logging
 from mako.template import Template
 from subprocess import check_call, CalledProcessError
 
 import zc.buildout
 import zc.recipe.deployment
-from birdhousebuilder.recipe import conda, supervisor
+from zc.recipe.deployment import Configuration
+from zc.recipe.deployment import make_dir
+import birdhousebuilder.recipe.conda
+from birdhousebuilder.recipe import supervisor
 
 catalina_sh = Template(filename=os.path.join(os.path.dirname(__file__), "catalina-wrapper.sh"))
 users_xml = Template(filename=os.path.join(os.path.dirname(__file__), "tomcat-users.xml"))
 server_xml = Template(filename=os.path.join(os.path.dirname(__file__), "server.xml"))
 
-def tomcat_home(prefix):
-    home_path = os.path.join(prefix, 'opt', 'apache-tomcat')
-    make_dirs(os.path.dirname(home_path))
-    return home_path
-
-def content_root(prefix):
-    root_path = os.path.join(prefix, 'var', 'lib', 'tomcat', 'content')
-    make_dirs(os.path.dirname(root_path))
-    return root_path
-
 def unzip(prefix, warfile):
     warname = os.path.basename(warfile)
     dirname = warname[0:-4]
-    appspath = os.path.join(tomcat_home(prefix), 'webapps')
+    appspath = os.path.join(prefix, 'webapps')
     dirpath = os.path.join(appspath, dirname)
     if not os.path.isdir(dirpath):
         try:
@@ -39,9 +33,10 @@ def unzip(prefix, warfile):
         except:
             raise
 
-def make_dirs(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+def make_dirs(name, user, mode=0o755):
+    etc_uid, etc_gid = pwd.getpwnam(user)[2:4]
+    created = []
+    make_dir(name, etc_uid, etc_gid, mode, created)
         
 class Recipe(object):
     """This recipe is used by zc.buildout.
@@ -51,94 +46,98 @@ class Recipe(object):
         self.buildout, self.name, self.options = buildout, name, options
         b_options = buildout['buildout']
 
-        self.name = options.get('name', name)
-        self.options['name'] = self.name
+        self.options['name'] = self.options.get('name', self.name)
+        self.name = self.options['name']
 
-        self.logger = logging.getLogger(self.name)
+        self.logger = logging.getLogger(name)
 
-        deployment = zc.recipe.deployment.Install(buildout, "tomcat", {
-                                                'prefix': self.options['prefix'],
-                                                'user': self.options['user'],
-                                                'etc-user': self.options['user']})
-        deployment.install()
+        # deployment layout
+        def add_section(section_name, options):
+            if section_name in buildout._raw:
+                raise KeyError("already in buildout", section_name)
+            buildout._raw[section_name] = options
+            buildout[section_name] # cause it to be added to the working parts
 
-        self.options['etc-prefix'] = deployment.options['etc-prefix']
-        self.options['var-prefix'] = deployment.options['var-prefix']
-        self.options['etc-directory'] = deployment.options['etc-directory']
-        self.options['lib-directory'] = deployment.options['lib-directory']
-        self.options['log-directory'] = deployment.options['log-directory']
-        self.options['cache-directory'] = deployment.options['cache-directory']
-        self.prefix = self.options['prefix']
-
-        self.env_path = conda.conda_env_path(buildout, options)
-        self.options['env_path'] = self.env_path
+        self.deployment_name = self.name + "-tomcat-deployment"
+        self.deployment = zc.recipe.deployment.Install(buildout, self.deployment_name, {
+            'name': "tomcat",
+            'prefix': self.options['prefix'],
+            'user': self.options['user'],
+            'etc-user': self.options['etc-user']})
+        add_section(self.deployment_name, self.deployment.options)
         
-        self.options['user'] = self.options.get('user', '')
+        self.options['etc-prefix'] = self.options['etc_prefix'] = self.deployment.options['etc-prefix']
+        self.options['var-prefix'] = self.options['var_prefix'] = self.deployment.options['var-prefix']
+        self.options['etc-directory'] = self.options['etc_directory'] = self.deployment.options['etc-directory']
+        self.options['lib-directory'] = self.options['lib_directory'] = self.deployment.options['lib-directory']
+        self.options['log-directory'] = self.options['log_directory'] = self.deployment.options['log-directory']
+        self.options['run-directory'] = self.options['run_directory'] = self.deployment.options['run-directory']
+        self.options['cache-directory'] = self.options['cache_directory'] = self.deployment.options['cache-directory']
+        self.options['content-directory'] = self.options['content_directory'] =os.path.join(self.options['lib-directory'], 'content')
+        self.prefix = self.options['prefix']
+        
+        # conda packages
+        self.options['env'] = self.options.get('env', '')
+        self.options['pkgs'] = self.options.get('pkgs', 'apache-tomcat')
+        self.options['channels'] = self.options.get('channels', 'defaults birdhouse')
+        self.conda = birdhousebuilder.recipe.conda.Recipe(self.buildout, self.name, {
+            'env': self.options['env'],
+            'pkgs': self.options['pkgs'],
+            'channels': self.options['channels'] })
+        self.options['conda-prefix'] = self.options['conda_prefix'] = self.conda.options['prefix']
+
+        # config options
         self.options['http_port'] = self.options.get('http_port', '8080')
         self.options['https_port'] = self.options.get('https_port', '8443')
         self.options['Xmx'] = self.options.get('Xmx', '1024m')
         self.options['Xms'] = self.options.get('Xms', '128m')
         self.options['MaxPermSize'] = self.options.get('MaxPermSize', '128m')
-        self.options['content_root'] = content_root(self.prefix)
         self.options['ncwms_password'] = self.options.get('ncwms_password', '')
+
+        # make folders
+        make_dirs(self.options['content-directory'], self.options['user'], mode=0o755)
 
     def install(self, update=False):
         installed = []
-        installed += list(self.install_tomcat(update))
+        if not update:
+            installed += list(self.deployment.install())
+        installed += list(self.conda.install(update))
         installed += list(self.install_catalina_wrapper())
         installed += list(self.setup_users_config())
         installed += list(self.setup_server_config())
         installed += list(self.install_supervisor(update))
         return installed
 
-    def install_tomcat(self, update=False):
-        script = conda.Recipe(
-            self.buildout,
-            self.name,
-            {'pkgs': 'apache-tomcat'})
-        return script.install(update)
-
     def install_catalina_wrapper(self):
-        result = catalina_sh.render(**self.options)
-
-        output = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'bin', 'catalina-wrapper.sh')
-        make_dirs(os.path.dirname(output))
-
-        with open(output, 'wt') as fp:
-            fp.write(result)
-        # make sure script is executable for all
-        os.chmod(output, 0o755)
-        return [output]
+        text = catalina_sh.render(**self.options)
+        config = Configuration(self.buildout, 'catalina-wrapper.sh', {
+            'deployment': self.deployment_name,
+            'text': text})
+        return [config.install()]
 
     def setup_users_config(self):
-        result = users_xml.render(**self.options)
-
-        output = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'conf', 'tomcat-users.xml')
-        make_dirs(os.path.dirname(output))
-
-        with open(output, 'wt') as fp:
-            fp.write(result)
-        return [output]
+        text = users_xml.render(**self.options)
+        config = Configuration(self.buildout, 'tomcat-users.xml', {
+            'deployment': self.deployment_name,
+            'text': text})
+        return [config.install()]
 
     def setup_server_config(self):
-        result = server_xml.render(**self.options)
-
-        output = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'conf', 'server.xml')
-        make_dirs(os.path.dirname(output))
-
-        with open(output, 'wt') as fp:
-            fp.write(result)
-        return [output]
+        text = server_xml.render(**self.options)
+        config = Configuration(self.buildout, 'server.xml', {
+            'deployment': self.deployment_name,
+            'text': text})
+        return [config.install()]
     
     def install_supervisor(self, update=False):
-        content_path = os.path.join(self.prefix, 'opt', 'apache-tomcat', 'content')
         script = supervisor.Recipe(
             self.buildout,
             self.name,
             {'prefix': self.options['prefix'],
              'user': self.options.get('user'),
+             'etc-user': self.options['etc-user'],
              'program': 'tomcat',
-             'command': '{0}/opt/apache-tomcat/bin/catalina-wrapper.sh'.format(self.prefix),
+             'command': '{0}/catalina-wrapper.sh'.format(self.options['etc-directory']),
              })
         return script.install(update)
 

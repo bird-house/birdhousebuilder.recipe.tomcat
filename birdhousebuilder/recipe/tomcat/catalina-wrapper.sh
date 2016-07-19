@@ -4,18 +4,18 @@
 #
 #ulimit -n 2048
 #
-CATALINA_HOME="${env_path}/opt/apache-tomcat"
+CATALINA_HOME="${lib_directory}"
 export CATALINA_HOME
-CATALINA_BASE="${env_path}/opt/apache-tomcat"
+CATALINA_BASE="${lib_directory}"
 export CATALINA_BASE
 #
-CONTENT_ROOT="-Dtds.content.root.path=${content_root}"
+CONTENT_ROOT="-Dtds.content.root.path=${content_directory}"
 NORMAL="-d64 -Xmx${Xmx} -Xms${Xms} -server"
 MAX_PERM_GEN="-XX:MaxPermSize=${MaxPermSize}"
 HEADLESS="-Djava.awt.headless=true"
 #             
-JAVA_HOME="${env_path}"
+JAVA_HOME="${conda_prefix}"
 JAVA_OPTS="$CONTENT_ROOT $HEADLESS $NORMAL $MAX_PERM_GEN"
 export JAVA_OPTS
 # start tomcat in foreground
-. ${env_path}/bin/catalina.sh run
+. ${etc_directory}/catalina.sh run
