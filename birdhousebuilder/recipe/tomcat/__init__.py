@@ -75,7 +75,7 @@ class Recipe(object):
         self.options['cache-directory'] = self.options['cache_directory'] = self.deployment.options['cache-directory']
         self.options['content-directory'] = self.options['content_directory'] =os.path.join(self.options['lib-directory'], 'content')
         self.prefix = self.options['prefix']
-        
+
         # conda packages
         self.options['env'] = self.options.get('env', '')
         self.options['pkgs'] = self.options.get('pkgs', 'apache-tomcat')
@@ -85,6 +85,10 @@ class Recipe(object):
             'pkgs': self.options['pkgs'],
             'channels': self.options['channels'] })
         self.options['conda-prefix'] = self.options['conda_prefix'] = self.conda.options['prefix']
+
+        # tomcat folders
+        self.options['catalina_home'] = os.path.join(self.options['conda-prefix'], 'opt', 'apache-tomcat')
+        self.options['catalina_base'] = self.options['lib-directory']
 
         # config options
         self.options['http_port'] = self.options.get('http_port', '8080')
