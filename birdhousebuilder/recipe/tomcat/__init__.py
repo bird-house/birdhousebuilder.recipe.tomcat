@@ -23,11 +23,10 @@ server_xml = Template(filename=os.path.join(os.path.dirname(__file__), "server.x
 def unzip(prefix, warfile):
     warname = os.path.basename(warfile)
     dirname = warname[0:-4]
-    appspath = os.path.join(prefix, 'webapps')
-    dirpath = os.path.join(appspath, dirname)
+    dirpath = os.path.join(prefix, 'webapps', dirname)
     if not os.path.isdir(dirpath):
         try:
-            check_call(['unzip', '-q', os.path.join(appspath, warname), '-d', dirpath])
+            check_call(['unzip', '-q', warfile, '-d', dirpath])
         except CalledProcessError:
             raise
         except:
