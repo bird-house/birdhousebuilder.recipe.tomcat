@@ -6,8 +6,6 @@ birdhousebuilder.recipe.tomcat
    :target: https://travis-ci.org/bird-house/birdhousebuilder.recipe.tomcat
    :alt: Travis Build
 
-.. contents::
-
 Introduction
 ************
 
@@ -22,9 +20,9 @@ Introduction
 Usage
 *****
 
-The recipe requires that Anaconda is already installed. It assumes that the default Anaconda location is in your home directory ``~/anaconda``. Otherwise you need to set the ``ANACONDA_HOME`` environment variable or the Buildout option ``anaconda-home``.
+The recipe requires that Anaconda is already installed. You can use the buildout option ``anaconda-home`` to set the prefix for the anaconda installation. Otherwise the environment variable ``CONDA_PREFIX`` (variable is set when activating a conda environment) is used as conda prefix. 
 
-It installs the ``apache-tomcat`` package from a conda channel in a conda enviroment named ``birdhouse``. The location of the birdhouse environment is ``.conda/envs/birdhouse``. It deploys a `Supervisor`_ configuration in ``~/.conda/envs/birdhouse/etc/supervisor/conf.d/tomcat.conf``. Supervisor can be started with ``~/.conda/envs/birdhouse/etc/init.d/supervisord start``.
+It installs the ``apache-tomcat`` package from a conda channel in a conda enviroment defined by ``CONDA_PREFIX``. The intallation folder is given by the ``prefix`` buildout option. It deploys a `Supervisor`_ configuration in ``${prefix}/etc/supervisor/conf.d/tomcat.conf``. Supervisor can be started with ``${prefix}/etc/init.d/supervisord start``.
 
 By default Tomcat will be available on http://localhost:8080/.
 
@@ -36,16 +34,7 @@ Supported options
 This recipe supports the following options:
 
 ``anaconda-home``
-   Buildout option with the root folder of the Anaconda installation. Default: ``$HOME/anaconda``.
-   The default location can also be set with the environment variable ``ANACONDA_HOME``. Example::
-
-     export ANACONDA_HOME=/opt/anaconda
-
-   Search priority is:
-
-   1. ``anaconda-home`` in ``buildout.cfg``
-   2. ``$ANACONDA_HOME``
-   3. ``$HOME/anaconda``
+   Buildout option pointing to the root folder of the Anaconda installation. Default: ``$HOME/anaconda``.
 
 ``http_port``
    HTTP Port for Tomcat service. Default: 8080
@@ -70,8 +59,6 @@ The following example ``buildout.cfg`` installs ``tomcat`` as a Supervisor servi
 
   [buildout]
   parts = tomcat
-
-  anaconda-home = /home/myself/anaconda
 
   [tomcat]
   recipe = birdhousebuilder.recipe.tomcat
