@@ -5,26 +5,32 @@ This module contains the tool of birdhousebuilder.recipe.tomcat
 from setuptools import find_packages
 from setuptools import setup
 
+name = 'birdhousebuilder.recipe.tomcat'
+
 version = '0.3.0'
-description = 'A Buildout recipe to install and configure tomcat for Anaconda.'
+description = 'A Buildout recipe to install and configure tomcat with conda.'
 long_description = (
     open('README.rst').read() + '\n' +
     open('AUTHORS.rst').read() + '\n' +
     open('CHANGES.rst').read()
 )
 
-entry_point = 'birdhousebuilder.recipe.tomcat'
-entry_points = {"zc.buildout": [
-                            "default = %s:Recipe" % entry_point,
-                          ],
-                "zc.buildout.uninstall": [
-                            "default = %s:uninstall" % entry_point,
-                          ],
-                       }
+entry_points = '''
+[zc.buildout]
+default = %(name)s:Recipe
+[zc.buildout.uninstall]
+default = %(name)s:uninstall
+''' % globals()
 
-tests_require = ['zope.testing', 'zc.buildout', 'manuel']
+reqs = ['setuptools',
+        'zc.buildout',
+        'zc.recipe.deployment >=1.3.0',
+        'Mako',
+        'birdhousebuilder.recipe.conda >=0.3.1',
+        'birdhousebuilder.recipe.supervisor >=0.3.3']
+tests_reqs = ['zc.buildout', 'zope.testing']
 
-setup(name='birdhousebuilder.recipe.tomcat',
+setup(name=name,
       version=version,
       description=description,
       long_description=long_description,
@@ -38,23 +44,14 @@ setup(name='birdhousebuilder.recipe.tomcat',
       ],
       keywords='buildout recipe birdhouse tomcat conda anaconda',
       author='Birdhouse',
-      author_email='',
+      author_email='wps-dev at dkrz.de',
       url='https://github.com/bird-house/birdhousebuilder.recipe.tomcat',
-      license='BSD',
+      license='Apache License 2',
+      install_requires = reqs,
+      extras_require = dict(tests=tests_reqs),
+      entry_points=entry_points,
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['birdhousebuilder', 'birdhousebuilder.recipe'],
       include_package_data=True,
       zip_safe=False,
-      install_requires=['setuptools',
-                        'zc.buildout',
-                        # -*- Extra requirements: -*-
-                        'Mako',
-                        'zc.recipe.deployment',
-                        'birdhousebuilder.recipe.conda',
-                        'birdhousebuilder.recipe.supervisor',
-                        ],
-      tests_require=tests_require,
-      extras_require=dict(tests=tests_require),
-      test_suite='birdhousebuilder.recipe.tomcat.tests.test_docs.test_suite',
-      entry_points=entry_points,
       )
