@@ -1,11 +1,16 @@
 language: python
 python:
   - "2.7"
+  - "3.5"
+sudo: false
+matrix:
+  allow_failures:
+    - python: 3.5
 install:
- - sudo apt-get install python-lxml
- - python setup.py install
- - pip install pytest-pep8 pytest-cov python-coveralls
+ - mkdir -p buildout-cache/eggs
+ - mkdir -p buildout-cache/downloads
+ - python bootstrap.py
+ - ./bin/buildout
 script:
- - python -c "import birdhousebuilder.recipe.tomcat"
-after_success:
- - coveralls
+ - ./bin/test -m birdhousebuilder.recipe.tomcat
+
