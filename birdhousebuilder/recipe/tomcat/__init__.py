@@ -17,8 +17,9 @@ import birdhousebuilder.recipe.conda
 from birdhousebuilder.recipe import supervisor
 
 setenv_sh = Template(filename=os.path.join(os.path.dirname(__file__), "setenv.sh"))
-users_xml = Template(filename=os.path.join(os.path.dirname(__file__), "tomcat-users.xml"))
+tomcat_users_xml = Template(filename=os.path.join(os.path.dirname(__file__), "tomcat-users.xml"))
 server_xml = Template(filename=os.path.join(os.path.dirname(__file__), "server.xml"))
+logging_props = Template(filename=os.path.join(os.path.dirname(__file__), "logging.properties"))
 
 def unzip(prefix, warfile):
     warname = os.path.basename(warfile)
@@ -117,8 +118,9 @@ class Recipe(object):
         installed += list(self.install_catalina_sh())
         installed += list(self.install_setenv_sh())
         installed += list(self.install_web_xml())
-        installed += list(self.setup_users_config())
-        installed += list(self.setup_server_config())
+        installed += list(self.install_tomcat_users_xml())
+        installed += list(self.install_server_xml())
+        installed += list(self.install_logging_props())
         installed += list(self.install_supervisor(update))
         return installed
 
@@ -148,17 +150,25 @@ class Recipe(object):
             'file': os.path.join(self.options['catalina-home'], 'conf', 'web.xml')})
         return [config.install()]
 
-    def setup_users_config(self):
-        text = users_xml.render(**self.options)
+    def install_tomcat_users_xml(self):
+        text = tomcat_users_xml.render(**self.options)
         config = Configuration(self.buildout, 'tomcat-users.xml', {
             'deployment': self.deployment_name,
             'directory': os.path.join(self.options['catalina-base'], 'conf' ),
             'text': text})
         return [config.install()]
 
-    def setup_server_config(self):
+    def install_server_xml(self):
         text = server_xml.render(**self.options)
         config = Configuration(self.buildout, 'server.xml', {
+            'deployment': self.deployment_name,
+            'directory': os.path.join(self.options['catalina-base'], 'conf' ),
+            'text': text})
+        return [config.install()]
+
+    def install_logging_props(self):
+        text = logging_props.render(**self.options)
+        config = Configuration(self.buildout, 'logging.properties', {
             'deployment': self.deployment_name,
             'directory': os.path.join(self.options['catalina-base'], 'conf' ),
             'text': text})
