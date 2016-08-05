@@ -3,7 +3,6 @@
 """Recipe tomcat"""
 
 import os
-import stat
 import pwd
 import logging
 from mako.template import Template
