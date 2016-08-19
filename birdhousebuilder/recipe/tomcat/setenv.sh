@@ -13,9 +13,11 @@ export CATALINA_BASE
 NORMAL="-d64 -Xmx${Xmx} -Xms${Xms} -server"
 MAX_PERM_GEN="-XX:MaxPermSize=${MaxPermSize}"
 HEADLESS="-Djava.awt.headless=true"
+# set prefs folder used by java
+JAVA_PREFS="-Djava.util.prefs.systemRoot=${catalina_base}/java_prefs/.java -Djava.util.prefs.userRoot=${catalina_base}/java_prefs/.java/.userPrefs"
 #             
 JAVA_HOME="${java_home}"
 export JAVA_HOME
-JAVA_OPTS="$HEADLESS $NORMAL $MAX_PERM_GEN"
+JAVA_OPTS="$HEADLESS $NORMAL $JAVA_PREFS"
 export JAVA_OPTS
 

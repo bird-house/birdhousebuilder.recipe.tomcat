@@ -109,6 +109,12 @@ class Recipe(object):
         make_dirs(os.path.join(self.options['catalina-base'], 'webapps' ), self.options['user'], mode=0o755)
         make_dirs(os.path.join(self.options['catalina-base'], 'work' ), self.options['user'], mode=0o755)
 
+        # prepare java prefs folders
+        # http://stackoverflow.com/questions/15004954/java-setting-preferences-backingstore-directory
+        make_dirs(os.path.join(self.options['catalina-base'], "java_prefs", ".java"), self.options['user'], mode=0o755)
+        make_dirs(os.path.join(self.options['catalina-base'], "java_prefs", ".java", ".systemPrefs"), self.options['user'], mode=0o755)
+        make_dirs(os.path.join(self.options['catalina-base'], "java_prefs", ".java", ".userPrefs"), self.options['user'], mode=0o755)
+
     def install(self, update=False):
         installed = []
         if not update:
