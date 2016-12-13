@@ -7,7 +7,7 @@ from setuptools import setup
 
 name = 'birdhousebuilder.recipe.tomcat'
 
-version = '0.3.2'
+version = '0.3.3'
 description = 'A Buildout recipe to install and configure tomcat with conda.'
 long_description = (
     open('README.rst').read() + '\n' +
