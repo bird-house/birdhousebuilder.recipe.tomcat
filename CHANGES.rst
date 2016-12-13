@@ -1,6 +1,14 @@
 Changes
 *******
 
+0.3.3 (2016-12-13)
+==================
+
+* pep8
+* updated MANIFEST.in: ignore tempfiles.
+* python 3.5 test activated in travis.
+* updated versions.cfg.
+
 0.3.2 (2016-08-19)
 ==================
 
